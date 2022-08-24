@@ -5,7 +5,6 @@ import Todo from "./components/Todo";
 import { firebase, auth, firestore } from "./firebase";
 
 import { useAuthState } from 'react-firebase-hooks/auth';
-import { useCollectionData } from 'react-firebase-hooks/firestore';
 
 export default function App() {
   const [user] = useAuthState(auth);
@@ -44,10 +43,14 @@ function TodoApp(){
     getList().then(list => setTodos(list))
   }, [])
 
-  function handleSubmit(e){
+  async function addTodo(e){
     e.preventDefault();
-    
-    setTodos(prevList => [input, ...prevList])
+
+    const listRef = firestore.collection('todos').doc('H35aL1D4S7zxSIMTJup5');
+
+    await listRef.set({
+      todoList: [input, ...todos]
+    })
 
     setInput('')
   }
@@ -61,7 +64,7 @@ function TodoApp(){
   return (
     <>
       <h2>TODO List</h2>
-      <form onSubmit={(event) => handleSubmit(event)}>
+      <form onSubmit={(e) => addTodo(e)}>
         <input
           placeholder="Make Todo"
           value={input}
