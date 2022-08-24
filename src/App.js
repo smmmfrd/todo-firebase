@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import Todo from "./components/Todo";
 
-import { firebase, auth } from "./firebase";
+import { firebase, auth, firestore } from "./firebase";
 
 import { useAuthState } from 'react-firebase-hooks/auth';
 import { useCollectionData } from 'react-firebase-hooks/firestore';
@@ -29,9 +29,20 @@ function SignIn(){
   )
 }
 
+async function getList(){
+  const listRef = firestore.collection('todos').doc('H35aL1D4S7zxSIMTJup5');
+  const doc = await listRef.get();
+  const data = doc.data();
+  return data.todoList;
+}
+
 function TodoApp(){
   const [input, setInput] = useState('');
   const [todos, setTodos] = useState([]);
+
+  useEffect(() =>{
+    getList().then(list => setTodos(list))
+  }, [])
 
   function handleSubmit(e){
     e.preventDefault();
