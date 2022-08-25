@@ -40,7 +40,7 @@ function TodoApp(){
   const [todos, setTodos] = useState([]);
 
   function updateList(){
-    getList().then(list => setTodos(list))
+    getList().then(list => setTodos(list));
   }
 
   useEffect(() => updateList(), [])
@@ -54,14 +54,27 @@ function TodoApp(){
       todoList: [input, ...todos]
     })
 
-    updateList()
+    updateList();
     setInput('');
+  }
+
+  async function deleteTodo(todo){
+    const listRef = firestore.collection('todos').doc('H35aL1D4S7zxSIMTJup5');
+
+    var tempArr = todos.filter(item => item !== todo);
+
+    await listRef.set({
+      todoList: tempArr
+    })
+
+    updateList();
   }
 
   const todoElements = todos.map(todo => 
     <Todo 
       title={todo}
       desc={todo}
+      handleDelete={deleteTodo}
     />)
 
   return (
