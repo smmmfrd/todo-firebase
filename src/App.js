@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import Todo from "./components/Todo";
 
@@ -12,7 +12,7 @@ export default function App() {
   return (
     <div className="App">
       <h1>TODO App</h1>
-      {user === null ? <SignIn /> : <TodoApp />}
+      {user === null ? <SignIn /> : <TodoApp userUid={user.uid}/>}
     </div>
   );
 }
@@ -28,27 +28,38 @@ function SignIn(){
   )
 }
 
-async function getList(){
-  const listRef = firestore.collection('todos').doc('H35aL1D4S7zxSIMTJup5');
+async function getList(uid){
+  const listRef = firestore.collection('todos').doc(uid);
   const doc = await listRef.get();
-  const data = doc.data();
+  var data;
+
+  if(doc.exists){
+    data = doc.data();
+  } else {
+    data = {
+      todoList: []
+    };
+    await firestore.collection('todos').doc(uid).set(data);
+  }
   return data.todoList;
 }
 
-function TodoApp(){
+function TodoApp(props){
+  const {userUid} = props;
+
   const [input, setInput] = useState('');
   const [todos, setTodos] = useState([]);
 
   function updateList(){
-    getList().then(list => setTodos(list));
+    getList(userUid).then(list => setTodos(list));
   }
 
-  useEffect(() => updateList(), [])
+  updateList();
 
   async function addTodo(e){
     e.preventDefault();
 
-    const listRef = firestore.collection('todos').doc('H35aL1D4S7zxSIMTJup5');
+    const listRef = firestore.collection('todos').doc(userUid);
 
     await listRef.set({
       todoList: [input, ...todos]
@@ -59,7 +70,7 @@ function TodoApp(){
   }
 
   async function deleteTodo(todo){
-    const listRef = firestore.collection('todos').doc('H35aL1D4S7zxSIMTJup5');
+    const listRef = firestore.collection('todos').doc(userUid);
 
     var tempArr = todos.filter(item => item !== todo);
 
@@ -72,6 +83,7 @@ function TodoApp(){
 
   const todoElements = todos.map(todo => 
     <Todo 
+      key={todo}
       title={todo}
       desc={todo}
       handleDelete={deleteTodo}
