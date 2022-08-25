@@ -39,9 +39,11 @@ function TodoApp(){
   const [input, setInput] = useState('');
   const [todos, setTodos] = useState([]);
 
-  useEffect(() =>{
+  function updateList(){
     getList().then(list => setTodos(list))
-  }, [])
+  }
+
+  useEffect(() => updateList(), [])
 
   async function addTodo(e){
     e.preventDefault();
@@ -52,7 +54,8 @@ function TodoApp(){
       todoList: [input, ...todos]
     })
 
-    setInput('')
+    updateList()
+    setInput('');
   }
 
   const todoElements = todos.map(todo => 
